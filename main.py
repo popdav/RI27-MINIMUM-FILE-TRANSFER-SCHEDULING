@@ -1,4 +1,13 @@
-from MockNetwork import DistributedNetwork
+from MockNetwork import Network
 
-d = DistributedNetwork(10, 3, 7)
-print(d)
+
+def main():
+    n = Network()
+    n.init_network()
+
+    for server in n:
+        print(server)
+
+
+if __name__ == '__main__':
+    main()

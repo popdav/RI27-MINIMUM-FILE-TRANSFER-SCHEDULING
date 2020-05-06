@@ -1,7 +1,10 @@
 import random
 from queue import Queue
+from threading import Thread
+import time
 
 MAX_FILE_SIZE = 1024
+NETWORK_SPEED = 256
 
 
 class Server:
@@ -39,8 +42,8 @@ class Server:
 
     def get_free_port(self):
         for i in range(self.num_of_ports):
-            if self.ports[i+1]['receive'] and self.ports[i]['send']:
-                return i
+            if self.ports[i+1]['receive'] and self.ports[i+1]['send']:
+                return i + 1
 
         return False
 
@@ -59,6 +62,40 @@ class Server:
     def get_num_of_neighbors(self):
         return len(self.neighbors)
 
+    def start_sending_brute_force(self):
+        print(f'Thread {self.id}: starting')
+
+        while not self.queue_of_transfers.empty():
+
+            current_port = self.get_free_port()
+
+            if current_port is False:
+                time.sleep(5)
+                continue
+
+            self.ports[current_port]['send'] = False
+            current_task = self.queue_of_transfers.get()
+            receiving_port = current_task[1].get_free_port()
+
+            if receiving_port is False:
+                self.queue_of_transfers.put(current_task)
+                self.ports[current_port]['send'] = True
+                time.sleep(5)
+                continue
+
+            current_task[1].ports[receiving_port]['receive'] = False
+            print(f'Sending file : {current_task[0]} from {self.id } to {current_task[1].id}\n')
+            file_size = self.files[current_task[0]]
+            time.sleep(file_size / (NETWORK_SPEED * 1.0))
+            print(f'Finished sending file : {current_task[0]} from {self.id} to {current_task[1].id}\n')
+            self.ports[current_port]['send'] = True
+            current_task[1].ports[receiving_port]['receive'] = True
+
+
+
+        print(f"Thread {self.id}: finished")
+
+
 
 class Network:
     def __init__(self):
@@ -66,7 +103,7 @@ class Network:
         self.server_num = 0
 
     def init_network(self):
-        server_num = 10
+        server_num = 50
         port_num = 3
         for i in range(server_num):
             self.add_server(i, random.randrange(100), random.randrange(100), 20, port_num)
@@ -104,6 +141,19 @@ class Network:
 
     def __iter__(self):
         return iter(self.server_list.values())
+
+    def start_network_brute_force(self):
+
+        threads = []
+
+        for i in range(self.server_num):
+            threads.append(Thread(target=self.server_list[i].start_sending_brute_force))
+            threads[i].start()
+
+        for thread in threads:
+            thread.join()
+
+
 
 
 

@@ -18,6 +18,7 @@ def main():
     nx.draw(G, nx.get_node_attributes(G, 'pos'), with_labels=True, node_size=400)
     plt.show()
 
+    n.start_network_brute_force()
 
 if __name__ == '__main__':
     main()

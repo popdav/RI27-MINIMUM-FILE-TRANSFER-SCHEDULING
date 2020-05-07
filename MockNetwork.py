@@ -23,11 +23,11 @@ class Server:
         self.num_of_ports = num_of_ports
         self.ports = {}
         for i in range(num_of_ports):
-            self.ports[i+1] = {'receive': True, 'send': True}
+            self.ports[i + 1] = {'receive': True, 'send': True}
 
     def __str__(self):
-        return str(self.id) + ':\n connected to: ' + str([x for x in self.neighbors])\
-                + '\n tasks: ' + self.str_tasks()
+        return str(self.id) + ':\n connected to: ' + str([x for x in self.neighbors]) \
+               + '\n tasks: ' + self.str_tasks()
 
     def str_tasks(self):
         list_of_tasks = list(self.queue_of_transfers.queue)
@@ -42,7 +42,7 @@ class Server:
 
     def get_free_port(self):
         for i in range(self.num_of_ports):
-            if self.ports[i+1]['receive'] and self.ports[i+1]['send']:
+            if self.ports[i + 1]['receive'] and self.ports[i + 1]['send']:
                 return i + 1
 
         return False
@@ -84,17 +84,14 @@ class Server:
                 continue
 
             current_task[1].ports[receiving_port]['receive'] = False
-            print(f'Sending file : {current_task[0]} from {self.id } to {current_task[1].id}\n')
+            print(f'Sending file : {current_task[0]} from {self.id} to {current_task[1].id}\n')
             file_size = self.files[current_task[0]]
             time.sleep(file_size / (NETWORK_SPEED * 1.0))
             print(f'Finished sending file : {current_task[0]} from {self.id} to {current_task[1].id}\n')
             self.ports[current_port]['send'] = True
             current_task[1].ports[receiving_port]['receive'] = True
 
-
-
         print(f"Thread {self.id}: finished")
-
 
 
 class Network:
@@ -109,7 +106,7 @@ class Network:
             self.add_server(i, random.randrange(100), random.randrange(100), 20, port_num)
 
         for k in self.server_list.keys():
-            num_of_tasks = random.randrange(1, server_num/2)
+            num_of_tasks = random.randrange(1, server_num / 2)
             for j in range(num_of_tasks):
                 file_id = random.randrange(self.server_list[k].file_num)
                 file_name = str(k) + '_f' + str(file_id)
@@ -152,9 +149,3 @@ class Network:
 
         for thread in threads:
             thread.join()
-
-
-
-
-
-

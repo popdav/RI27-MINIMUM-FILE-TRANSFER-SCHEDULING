@@ -12,9 +12,10 @@ class Chromosome:
 
 class GeneticAlgorithm:
 
-    def __init__(self, num_of_files, poss_val):
+    def __init__(self, num_of_files, poss_val, server_id):
         self.gene_length = num_of_files
         self.possible_values = poss_val
+        self.server_id = server_id
 
         self.generation_size = 10
         self.reproduction_size = 4
@@ -25,7 +26,7 @@ class GeneticAlgorithm:
     def calculate_fitness(self, genetic_code):
         fitness_val = 0
 
-        for i in range(self.gene_length):
+        for i in range(len(genetic_code)):
             fitness_val += (genetic_code[i]['neighbor_ports']/(genetic_code[i]['time_to_send'] * 1.0)) \
                            * (self.gene_length - i)
 
@@ -50,7 +51,7 @@ class GeneticAlgorithm:
 
         for i in range(self.reproduction_size):
             selected.append(self.tournament_selection(chromosomes))
-
+        # print(f'Server id: {self.server_id}, finished selection\n')
         return selected
 
     def tournament_selection(self, chromosomes):
@@ -64,12 +65,12 @@ class GeneticAlgorithm:
         random_val = random.random()
 
         if random_val < self.mutation_rate:
-            random_i = random.randrange(self.gene_length)
-            random_j = random.randrange(self.gene_length)
+            random_i = random.randrange(len(genetic_code))
+            random_j = random.randrange(len(genetic_code))
             while True:
                 if random_i != random_j:
                     break
-                random_j = random.randrange(self.gene_length)
+                random_j = random.randrange(len(genetic_code))
 
             tmp = genetic_code[random_i]
             genetic_code[random_i] = genetic_code[random_j]
@@ -118,6 +119,7 @@ class GeneticAlgorithm:
         population = self.init_population()
 
         for i in range(0, self.max_iterations):
+            # print(f'Server id: {self.server_id}, iteratior : {i}')
             selected = self.selection(population)
 
             population = self.create_generation(selected)

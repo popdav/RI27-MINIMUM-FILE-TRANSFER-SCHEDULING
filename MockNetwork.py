@@ -112,8 +112,8 @@ class Server:
             )
             self.queue_of_transfers.get()
 
-        print('start optimization server id: ' + str(self.id))
-        GA = GeneticAlgorithm(len(list_of_tasks), poss_val)
+        # print('start optimization server id: ' + str(self.id))
+        GA = GeneticAlgorithm(len(list_of_tasks), poss_val, self.id)
 
         best_code = GA.optimaze()
         print('stop optimization server id: ' + str(self.id))
@@ -128,13 +128,13 @@ class Network:
         self.server_num = 0
 
     def init_network(self):
-        server_num = 6
+        server_num = 2
         port_num = 3
         for i in range(server_num):
             self.add_server(i, random.randrange(100), random.randrange(100), 20, port_num)
 
         for k in self.server_list.keys():
-            num_of_tasks = random.randrange(1, server_num / 2)
+            num_of_tasks = 1#random.randrange(1, server_num / 2)
             for j in range(num_of_tasks):
                 file_id = random.randrange(self.server_list[k].file_num)
                 file_name = str(k) + '_f' + str(file_id)

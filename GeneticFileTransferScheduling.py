@@ -18,7 +18,7 @@ class GeneticAlgorithm:
 
         self.generation_size = 10
         self.reproduction_size = 4
-        self.max_iterations = 100
+        self.max_iterations = 20
         self.mutation_rate = 0.1
         self.tournament_size = 3
 
@@ -56,12 +56,12 @@ class GeneticAlgorithm:
     def tournament_selection(self, chromosomes):
         selected = random.sample(chromosomes, self.tournament_size)
 
-        winner = max(selected, key = lambda x: x.fitness)
+        winner = max(selected, key=lambda x: x.fitness)
 
         return winner
 
     def mutate(self, genetic_code):
-        random_val = random.random
+        random_val = random.random()
 
         if random_val < self.mutation_rate:
             random_i = random.randrange(self.gene_length)
@@ -77,6 +77,51 @@ class GeneticAlgorithm:
 
         return genetic_code
 
+    def crossover(self, parent1, parent2):
+        child = []
+        child_p1 = []
+        child_p2 = []
 
+        gene_a = int(random.random() * len(parent1))
+        gene_b = int(random.random() * len(parent1))
 
+        start_gene = min(gene_a, gene_b)
+        end_gene = max(gene_a, gene_b)
 
+        for i in range(start_gene, end_gene):
+            child_p1.append(parent1[i])
+
+        child_p2 = [item for item in parent2 if item not in child_p1]
+
+        child = child_p1 + child_p2
+        return child
+
+    def create_generation(self, chromosomes):
+        generation = []
+        generation_size = 0
+
+        while generation_size < self.generation_size:
+            [parent1, parent2] = random.sample(chromosomes, 2)
+            child1_code = self.crossover(parent1.genetic_code, parent2.genetic_code)
+
+            child1_code = self.mutate(child1_code)
+
+            child1 = Chromosome(child1_code, self.calculate_fitness(child1_code))
+
+            generation.append(child1)
+
+            generation_size += 1
+
+        return generation
+
+    def optimaze(self):
+        population = self.init_population()
+
+        for i in range(0, self.max_iterations):
+            selected = self.selection(population)
+
+            population = self.create_generation(selected)
+
+            global_best_chromosome = max(population, key=lambda x: x.fitness)
+
+        return global_best_chromosome.genetic_code

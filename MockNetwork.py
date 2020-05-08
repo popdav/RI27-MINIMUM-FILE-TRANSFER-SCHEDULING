@@ -3,6 +3,8 @@ from queue import Queue
 from threading import Thread
 import time
 
+from GeneticFileTransferScheduling import GeneticAlgorithm
+
 MAX_FILE_SIZE = 1024
 NETWORK_SPEED = 256
 
@@ -93,6 +95,32 @@ class Server:
 
         print(f"Thread {self.id}: finished")
 
+    def genetic_optimization(self):
+        list_of_tasks = list(self.queue_of_transfers.queue)
+        poss_val = []
+        for task in list_of_tasks:
+            file_name = task[0]
+            file_size = self.files[file_name]
+            server = task[1]
+            poss_val.append(
+                {
+                    'file_name': file_name,
+                    'neighbor_id': server.id,
+                    'neighbor_ports': server.num_of_ports,
+                    'time_to_send': file_size / (NETWORK_SPEED * 1.0)
+                }
+            )
+            self.queue_of_transfers.get()
+
+        print('start optimization server id: ' + str(self.id))
+        GA = GeneticAlgorithm(len(list_of_tasks), poss_val)
+
+        best_code = GA.optimaze()
+        print('stop optimization server id: ' + str(self.id))
+        # for item in best_code:
+        #     self.queue_of_transfers.put((item['file_name'], self.neighbors[item['neighbor_id']]))
+        return
+
 
 class Network:
     def __init__(self):
@@ -100,7 +128,7 @@ class Network:
         self.server_num = 0
 
     def init_network(self):
-        server_num = 50
+        server_num = 6
         port_num = 3
         for i in range(server_num):
             self.add_server(i, random.randrange(100), random.randrange(100), 20, port_num)
@@ -145,6 +173,15 @@ class Network:
 
         for i in range(self.server_num):
             threads.append(Thread(target=self.server_list[i].start_sending_brute_force))
+            threads[i].start()
+
+        for thread in threads:
+            thread.join()
+
+    def start_genetic_algorithm(self):
+        threads = []
+        for i in range(self.server_num):
+            threads.append(Thread(target=self.server_list[i].genetic_optimization))
             threads[i].start()
 
         for thread in threads:

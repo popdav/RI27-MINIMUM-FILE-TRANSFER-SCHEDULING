@@ -3,6 +3,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 import networkx as nx
 from itertools import product
+import time
 
 
 def main():
@@ -18,9 +19,19 @@ def main():
     #
     # nx.draw(G, nx.get_node_attributes(G, 'pos'), with_labels=True, node_size=400)
     # plt.show()
-    n.start_genetic_algorithm()
+    start_brute = time.time()
+    n.start_network_brute_force()
+    end_brute = time.time()
+    for server in n:
+        server.copy_queue_to_original()
 
-    # n.start_network_brute_force()
+    start_gen = time.time()
+    n.start_genetic_algorithm()
+    n.start_network_brute_force()
+    end_gen = time.time()
+
+    print(f'Brute force duration : {end_brute - start_brute}\n')
+    print(f'Gen duration : {end_gen - start_gen}')
 
 
 if __name__ == '__main__':

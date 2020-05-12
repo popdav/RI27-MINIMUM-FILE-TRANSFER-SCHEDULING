@@ -2,6 +2,7 @@ import random
 from queue import Queue
 from threading import Thread
 import time
+import copy
 
 from GeneticFileTransferScheduling import GeneticAlgorithm
 
@@ -16,6 +17,7 @@ class Server:
         self.latitude = latitude
         self.neighbors = {}
         self.queue_of_transfers = Queue()
+        self.copy_of_queue_of_transfers = Queue()
 
         self.file_num = random.randrange(1, max_files_to_send)
         self.files = {}
@@ -41,6 +43,11 @@ class Server:
 
     def add_to_queue(self, file, server):
         self.queue_of_transfers.put((file, server))
+        self.copy_of_queue_of_transfers.put((file, server))
+
+    def copy_queue_to_original(self):
+        for task in self.copy_of_queue_of_transfers.queue:
+            self.queue_of_transfers.put(task)
 
     def get_free_port(self):
         for i in range(self.num_of_ports):
@@ -65,7 +72,7 @@ class Server:
         return len(self.neighbors)
 
     def start_sending_brute_force(self):
-        print(f'Thread {self.id}: starting')
+        # print(f'Thread {self.id}: starting')
 
         while not self.queue_of_transfers.empty():
 
@@ -86,14 +93,14 @@ class Server:
                 continue
 
             current_task[1].ports[receiving_port]['receive'] = False
-            print(f'Sending file : {current_task[0]} from {self.id} to {current_task[1].id}\n')
+            # print(f'Sending file : {current_task[0]} from {self.id} to {current_task[1].id}\n')
             file_size = self.files[current_task[0]]
             time.sleep(file_size / (NETWORK_SPEED * 1.0))
-            print(f'Finished sending file : {current_task[0]} from {self.id} to {current_task[1].id}\n')
+            # print(f'Finished sending file : {current_task[0]} from {self.id} to {current_task[1].id}\n')
             self.ports[current_port]['send'] = True
             current_task[1].ports[receiving_port]['receive'] = True
 
-        print(f"Thread {self.id}: finished")
+        # print(f"Thread {self.id}: finished")
 
     def genetic_optimization(self):
         list_of_tasks = list(self.queue_of_transfers.queue)
@@ -116,9 +123,9 @@ class Server:
         GA = GeneticAlgorithm(len(list_of_tasks), poss_val, self.id)
 
         best_code = GA.optimaze()
-        print('stop optimization server id: ' + str(self.id))
-        # for item in best_code:
-        #     self.queue_of_transfers.put((item['file_name'], self.neighbors[item['neighbor_id']]))
+        # print(f'stop optimization server id: {str(self.id)} \n')
+        for item in best_code:
+            self.queue_of_transfers.put((item['file_name'], self.neighbors[item['neighbor_id']]))
         return
 
 
@@ -128,17 +135,19 @@ class Network:
         self.server_num = 0
 
     def init_network(self):
-        server_num = 2
+        server_num = 200
         port_num = 3
         for i in range(server_num):
             self.add_server(i, random.randrange(100), random.randrange(100), 20, port_num)
 
         for k in self.server_list.keys():
-            num_of_tasks = 1#random.randrange(1, server_num / 2)
+            num_of_tasks = random.randrange(1, server_num / 2)
             for j in range(num_of_tasks):
                 file_id = random.randrange(self.server_list[k].file_num)
                 file_name = str(k) + '_f' + str(file_id)
                 server_to = self.server_list[random.randrange(server_num)]
+                while server_to.id == k:
+                    server_to = self.server_list[random.randrange(server_num)]
                 self.server_list[k].add_to_queue(file_name, server_to)
 
     def add_server(self, key, longitude, latitude, max_files_to_send, num_of_ports):

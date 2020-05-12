@@ -62,6 +62,10 @@ class GeneticAlgorithm:
         return winner
 
     def mutate(self, genetic_code):
+
+        if len(genetic_code) <= 1:
+            return genetic_code
+
         random_val = random.random()
 
         if random_val < self.mutation_rate:
@@ -101,6 +105,7 @@ class GeneticAlgorithm:
         generation = []
         generation_size = 0
 
+        # print(f'Server id: {self.server_id}, creating generation')
         while generation_size < self.generation_size:
             [parent1, parent2] = random.sample(chromosomes, 2)
             child1_code = self.crossover(parent1.genetic_code, parent2.genetic_code)
@@ -112,18 +117,20 @@ class GeneticAlgorithm:
             generation.append(child1)
 
             generation_size += 1
-
+            # print(f'Server id: {self.server_id}, gen size : {generation_size}')
+        # print(f'Server id: {self.server_id}, finished creating generation')
         return generation
 
     def optimaze(self):
         population = self.init_population()
 
         for i in range(0, self.max_iterations):
-            # print(f'Server id: {self.server_id}, iteratior : {i}')
+            # print(f'Server id: {self.server_id}, iteration : {i}')
             selected = self.selection(population)
 
             population = self.create_generation(selected)
 
             global_best_chromosome = max(population, key=lambda x: x.fitness)
+            # print(f'Server id: {self.server_id}, global best ch: : {global_best_chromosome}')
 
         return global_best_chromosome.genetic_code

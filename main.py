@@ -8,8 +8,11 @@ import time
 
 def main():
     n = Network()
-    n.init_network()
-
+    # n.init_network(10, 1, 1)
+    # n.save_to_json("data.json")
+    n.load_from_json("data.json")
+    n.calc_time()
+    # print(n.server_list)
     # G = nx.Graph()
     #
     # for server in n:
@@ -19,19 +22,26 @@ def main():
     #
     # nx.draw(G, nx.get_node_attributes(G, 'pos'), with_labels=True, node_size=400)
     # plt.show()
+    
     start_brute = time.time()
     n.start_network_brute_force()
     end_brute = time.time()
-    for server in n:
-        server.copy_queue_to_original()
-
-    start_gen = time.time()
-    n.start_genetic_algorithm()
-    n.start_network_brute_force()
-    end_gen = time.time()
-
     print(f'Brute force duration : {end_brute - start_brute}\n')
-    print(f'Gen duration : {end_gen - start_gen}')
+
+    # for server in n:
+    #     server.copy_queue_to_original()
+
+    # start_gen = time.time()
+    # n.start_genetic_algorithm()
+    # end_gen = time.time()
+
+    # start_gen_brute = time.time()
+    # n.start_network_brute_force()
+    # end_gen_brute = time.time()
+
+    
+    # print(f'Gen duration : {end_gen - start_gen}\n')
+    # print(f'Gen brute duration : {end_gen_brute - start_gen_brute}\n')
 
 
 if __name__ == '__main__':

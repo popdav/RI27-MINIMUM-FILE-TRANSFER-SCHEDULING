@@ -5,6 +5,7 @@ import time
 import copy
 import json
 import math
+from geneticAlgorithm_v2 import GeneticAlgorithm as ga
 
 from GeneticFileTransferScheduling import GeneticAlgorithm
 
@@ -88,14 +89,13 @@ class Server:
         return len(self.neighbors)
 
     def cacl_my_time(self):
+        self.my_time = 0
         list_transfer = list(self.queue_of_transfers.queue)
         list_receiving = list(self.queue_of_receiving.queue)
         i = 0
         j = 0
-        print(f"Server {self.id}")
         while j < len(list_receiving):
             task_receiving = list_receiving[j]
-            print(f"time: {self.my_time}, tr time: {task_receiving[1].my_time}")
             if task_receiving[1].index < self.index:
                 if 2*self.my_time < task_receiving[1].my_time:
                     self.my_time = task_receiving[1].my_time
@@ -132,7 +132,6 @@ class Server:
                     if pred_server_list_receiving[0][1].index < pred_server.index:
                         pred_is_blocked = True
 
-            print(f"time: {self.my_time}, tt time: {task_transfer[1].my_time}, to add: {time_to_add}")
             if time_to_add < self.my_time or pred_is_blocked:
                 self.my_time += self.files[task_transfer[0]] / NETWORK_SPEED
 
@@ -144,12 +143,10 @@ class Server:
                 else:
                     self.my_time += math.ceil(time_to_add) + 4 - (math.ceil(time_to_add) % 4) + self.files[task_transfer[0]] / NETWORK_SPEED
             i += 1
-        
-        print(f"End server {self.id}, time: {self.my_time}\n")
+
         return self.my_time
 
     def start_sending_brute_force(self):
-        print(f'Thread {self.id}: starting')
         start_brute = time.time()
         while not self.queue_of_transfers.empty():
 
@@ -170,14 +167,11 @@ class Server:
                 continue
 
             current_task[1].ports[receiving_port]['receive'] = False
-            print(f'Sending file : {current_task[0]} from {self.id} to {current_task[1].id}\n')
             file_size = self.files[current_task[0]]
             time.sleep(file_size / (NETWORK_SPEED * 1.0))
-            print(f'Finished sending file : {current_task[0]} from {self.id} to {current_task[1].id}\n')
             self.ports[current_port]['send'] = True
             current_task[1].ports[receiving_port]['receive'] = True
         end_brute = time.time()
-        print(f"Thread {self.id}: finished, duration : {end_brute - start_brute}")
 
 
     def genetic_optimization(self):
@@ -314,11 +308,15 @@ class Network:
             thread.join()
 
     def calc_time(self):
-        for i in range(self.server_num):
-            print(f"Server {self.server_list[i].id}, index: {self.server_list[i].index}")   
 
         arr_of_time = []
         for i in range(self.server_num):
             arr_of_time.append(self.server_list[i].cacl_my_time())
             
         print(arr_of_time)
+        return max(arr_of_time)
+
+    def start_genetic_v2(self):
+        print("Start gen v2")
+        genetic_alg = ga(self.server_num, self.server_list)
+        self.server_list = genetic_alg.optimaze()

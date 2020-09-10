@@ -7,10 +7,11 @@ import time
 
 
 def main():
+    file_name = "data100.json"
     n = Network()
-    n.init_network(100, 1, 1)
-    n.save_to_json("data.json")
-    # n.load_from_json("data.json")
+    # n.init_network(100, 1, 1)
+    # n.save_to_json(file_name)
+    n.load_from_json("data.json")
     # n.calc_time()
     # print(n.server_list)
     # G = nx.Graph()
@@ -29,19 +30,34 @@ def main():
     print(f'Brute force duration : {end_brute - start_brute}\n')
 
     n1 = Network()
-    n1.load_from_json("data.json")
+    n1.load_from_json(file_name)
 
-    start_gen = time.time()
+    start_gen1 = time.time()
     n1.start_genetic_v2()
-    end_gen = time.time()
+    end_gen1 = time.time()
 
-    start_gen_brute = time.time()
+    start_gen_brute1 = time.time()
     n1.start_network_brute_force()
-    end_gen_brute = time.time()
+    end_gen_brute1 = time.time()
 
-    print(f'Gen duration : {end_gen - start_gen}\n')
-    print(f'Gen brute duration : {end_gen_brute - start_gen_brute}\n')
-    print(f'Brute force duration : {end_brute - start_brute}\n')
+    n2 = Network()
+    n2.load_from_json(file_name)
+
+    start_gen2 = time.time()
+    n2.start_genetic_v2()
+    end_gen2 = time.time()
+
+    start_gen_brute2 = time.time()
+    n2.start_network_brute_force()
+    end_gen_brute2 = time.time()
+
+    print(f'Gentic algotithm_v2 duration: {end_gen2 - start_gen2}\n')
+    print(f'Gentic algotithm_v2 and Demand Protocol: {end_gen_brute2 - start_gen_brute2}\n')
+
+    print(f'Gentic algotithm_v1: {end_gen1 - start_gen1}\n')
+    print(f'Gentic algotithm_v1 and Demand Protocol: {end_gen_brute1 - start_gen_brute1}\n')
+
+    print(f'Demand Protocol: {end_brute - start_brute}\n')
 
 
 if __name__ == '__main__':
